@@ -19,7 +19,7 @@ public class EntropyUtils {
      * @return the information gain for each attribute
      */
     public static List<Double> calcInformationGain(Collection<Object[]> matrix, int labelIndex) {
-
+        return null;
     }
 
     /**
@@ -32,7 +32,7 @@ public class EntropyUtils {
      * @return the information gain for a single attribute
      */
     public static double calcInformationGainForAttribute(int attributeIndex, Collection<Object[]> matrix, int labelIndex) {
-
+        return 0.0;
     }
 
     /**
@@ -44,7 +44,8 @@ public class EntropyUtils {
     public static double calculateEntropy(long[] counts) {
 
 
-        return entropy;
+//        return entropy;
+        return 0.0;
     }
 
     /**
@@ -58,7 +59,8 @@ public class EntropyUtils {
      */
     public static double calculateRestEntropyForAttribute(int attributeIndex, Collection<Object[]> matrix, int labelIndex) {
 
-        return restEntropy;
+//        return restEntropy;
+        return 0.0;
     }
 
     /**
@@ -73,7 +75,8 @@ public class EntropyUtils {
      */
     public static double calculateEntropyForAttributeValue(int attributeIndex, Collection<Object[]> matrix, Object value, int labelIndex) {
 
-        return calculateEntropy(counts);
+//        return calculateEntropy(counts);
+        return 0.0;
     }
 
 

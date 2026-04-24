@@ -23,8 +23,9 @@ public class CrossValidator {
     public static DecisionTree performCrossValidation(List<Object[]> dataset, int labelAttribute, BiFunction<List<Object[]>, Integer, DecisionTree> trainFunction,
                                                       int numFolds) {
 
-        System.out.println("Classification accuracy of best model: " + accuracyBestModel);
-        return bestModel;
+//        System.out.println("Classification accuracy of best model: " + accuracyBestModel);
+//        return bestModel;
+        return null;
     }
 
 }

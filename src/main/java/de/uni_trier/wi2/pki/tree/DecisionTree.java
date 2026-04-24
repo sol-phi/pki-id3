@@ -25,7 +25,8 @@ public class DecisionTree extends DecisionTreeNode {
     public String predict(Object[] example) {
 
 
-        return leafNode.getLabelClass();
+//        return leafNode.getLabelClass();
+        return null;
     }
 
     /**

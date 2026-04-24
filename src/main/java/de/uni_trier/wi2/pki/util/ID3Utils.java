@@ -38,7 +38,8 @@ public class ID3Utils {
 
 
 
-        return currentNode;
+//        return currentNode;
+        return null;
     }
 
     /**
@@ -49,7 +50,7 @@ public class ID3Utils {
      * @return the index of the attribute to select next.
      */
     public static int selectEfficientAttribute(Collection<Object[]> examples, int labelIndex) {
-
+        return 0;
     }
 
     /**
@@ -60,7 +61,7 @@ public class ID3Utils {
      * @return the class name of the dominant class.
      */
     public static String getDominantClass(Collection<Object[]> examples, int labelIndex) {
-
+        return null;
     }
 
     /**
@@ -72,6 +73,6 @@ public class ID3Utils {
      * @return the classification accuracy.
      */
     public static double getClassificationAccuracy(DecisionTree decisionTree, Collection<Object[]> validationExamples, int labelIndex) {
-
+        return 0.0;
     }
 }

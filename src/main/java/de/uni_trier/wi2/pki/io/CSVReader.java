@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,7 +25,22 @@ public class CSVReader {
      * @throws IOException if something goes wrong. Exception should be handled at the calling function.
      */
     public static List<String[]> readCsvToArray(String relativePath, String delimiter, boolean ignoreHeader) throws IOException {
+        // One String[] is one line in the CSV file, one student. One String[] entry is one value for one trait of that student.
+        // The List contains all lines, aka all students.
 
+        List<String[]> parsedLines = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(relativePath)))) {
+            // If ignoreHeader is enabled, read and discard the first line, using it up already
+            if (ignoreHeader) br.readLine();
+
+            // Reads and assigns every line in the while head, then splits the long string into a String[], and adds to the list.
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(delimiter);
+                parsedLines.add(values);
+            }
+        }
 
         return parsedLines;
     }

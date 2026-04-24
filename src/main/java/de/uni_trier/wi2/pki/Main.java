@@ -19,13 +19,16 @@ public class Main {
 
     public static void main(String[] args) {
         // some constants
-        final String FILE_NAME = "mycsv.csv";
+        final String FILE_NAME = "student-mat.csv";
         final int LABEL_ATTR_INDEX = 10;
 
         // parse CSV data
         List<String[]> parsedLines = null;
-        try {
+        try { // "target/classes/" corresponds to "src/main/resources/"
             parsedLines = CSVReader.readCsvToArray("target/classes/" + FILE_NAME, ";", true);
+
+//            // Debug print to peek the data just read
+//            parsedLines.subList(0, 9).forEach(line -> System.out.printf(("%-13s| ".repeat(line.length) + "%n"), (Object[]) line));
         } catch (IOException e) {
             e.printStackTrace();
         }

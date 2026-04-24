@@ -22,7 +22,8 @@ public class EqualWidthDiscretization extends BinningDiscretizer {
     public List<Object[]> discretize(int numberOfBins, List<Object[]> examples, int attributeId) {
 
 
-        return outputList;
+//        return outputList;
+        return null;
     }
 
 }
