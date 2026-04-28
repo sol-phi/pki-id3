@@ -5,7 +5,9 @@ import de.uni_trier.wi2.pki.io.XMLWriter;
 import de.uni_trier.wi2.pki.postprocess.CrossValidator;
 import de.uni_trier.wi2.pki.postprocess.ReducedErrorPruner;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
+import de.uni_trier.wi2.pki.preprocess.EqualFrequencyDiscretization;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
+import de.uni_trier.wi2.pki.preprocess.KMeansDiscretizer;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
 import de.uni_trier.wi2.pki.util.EntropyUtils;
 import de.uni_trier.wi2.pki.util.ID3Utils;
@@ -90,7 +92,7 @@ public class Main {
 
         // --- TEST OUTPUT ---
         System.out.println("--- DISCRETIZATION TEST ---");
-        System.out.println("Printing the first 5 students to check results:");
+        System.out.println("Printing the first 100 students to check results:");
 
 // We look at Index 2 (Age) and Index 29 (Absences) because they were 'true' (continuous)
         for (int i = 0; i < 100; i++) {
@@ -98,6 +100,7 @@ public class Main {
             System.out.println("Student " + (i+1) + ": " +
                     "Age=" + row[2] + " | " +
                     "Absences=" + row[29] + " | " +
+                    "Studytime=" + row[13] + " | " +
                     "G3 (Label)=" + row[32]);
         }
         System.out.println("---------------------------");

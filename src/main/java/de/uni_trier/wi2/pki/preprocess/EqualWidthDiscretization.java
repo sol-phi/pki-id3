@@ -33,6 +33,18 @@ public class EqualWidthDiscretization extends BinningDiscretizer {
             if (value > max) max = value;
         }
 
+        /*
+         * Berechnung des Bin-Index (Beispiel):
+         * ------------------------------------
+         * Formel: index = (Eingabewert - Minimum) / Intervallbreite
+         * * Beispiel mit Alter (min=15, max=21, bins=3):
+         * 1. Breite = (21 - 15) / 3 = 2.0
+         * 2. Für Wert 15: (15 - 15) / 2.0 = 0.0 -> (int)0 -> Bin0
+         * 3. Für Wert 17: (17 - 15) / 2.0 = 1.0 -> (int)1 -> Bin1
+         * 4. Für Wert 18: (18 - 15) / 2.0 = 1.5 -> (int)1 -> Bin1
+         * 5. Für Wert 21: (21 - 15) / 2.0 = 3.0 -> (int)3 -> if(3>=3) -> Bin2
+         */
+
         // 2. Calculate how wide each bin is
         double binWidth = (max - min) / numberOfBins;
 
