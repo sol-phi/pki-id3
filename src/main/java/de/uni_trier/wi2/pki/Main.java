@@ -95,7 +95,7 @@ public class Main {
         System.out.println("Printing the first 100 students to check results:");
 
 // We look at Index 2 (Age) and Index 29 (Absences) because they were 'true' (continuous)
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < examples.size(); i++) {
             Object[] row = examples.get(i);
             System.out.println("Student " + (i+1) + ": " +
                     "Age=" + row[2] + " | " +
