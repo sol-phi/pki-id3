@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,19 +22,21 @@ public class CSVReader {
      * @throws IOException if something goes wrong. Exception should be handled at the calling function.
      */
     public static List<String[]> readCsvToArray(String relativePath, String delimiter, boolean ignoreHeader) throws IOException {
-        // One String[] is one line in the CSV file, one student. One String[] entry is one value for one trait of that student.
-        // The List contains all lines, aka all students.
-
         List<String[]> parsedLines = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(relativePath)))) {
-            // If ignoreHeader is enabled, read and discard the first line, using it up already
-            if (ignoreHeader) br.readLine();
 
-            // Reads and assigns every line in the while head, then splits the long string into a String[], and adds to the list.
+            if (ignoreHeader) {
+                br.readLine();
+            }
+
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(delimiter);
+
+                // clean data and values
+                cleanValues(values);
+
                 parsedLines.add(values);
             }
         }
@@ -45,4 +44,35 @@ public class CSVReader {
         return parsedLines;
     }
 
+    /**
+     * Removes surrounding quotes and whitespace from each string in the array.
+     * * @param values The array of strings to be cleaned.
+     */
+    private static void cleanValues(String[] values) {
+        for (int i = 0; i < values.length; i++) {
+            values[i] = values[i].replace("\"", "").trim();
+        }
+    }
+}
+
+//Test class for output
+class TestCSVReader {
+
+    public static void main(String[] args) {
+        String path = "src/main/resources/student-mat.csv";
+        String delimiter = ";";
+
+        try {
+            List<String[]> data = CSVReader.readCsvToArray(path, delimiter, true);
+
+            for (String[] row : data) {
+                for (String value : row) {
+                    System.out.print(value + "   |   ");
+                }
+                System.out.println();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
