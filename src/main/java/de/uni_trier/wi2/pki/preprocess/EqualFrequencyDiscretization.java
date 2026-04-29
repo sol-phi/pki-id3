@@ -30,7 +30,9 @@ public class EqualFrequencyDiscretization extends BinningDiscretizer {
         }
         Arrays.sort(sortedValues);
 
-        // 2. Determine how many items fit in one bin
+        // 2. Determine how many items fit in one bin.
+        // We round up to make space for the last sortedValues.length % numberOfBins values,
+        // rather than round down, which would cut off those remaining values.
         int itemsPerBin = (int) Math.ceil((double) sortedValues.length / numberOfBins);
 
         // 3. Assign bins based on position in the sorted distribution
@@ -39,6 +41,10 @@ public class EqualFrequencyDiscretization extends BinningDiscretizer {
             int assignedBin = 0;
 
             for (int b = 0; b < numberOfBins; b++) {
+                // (b + 1) * itemsPerBin - 1 calculates the index of the right end of the intervals.
+                // Since the last interval has that leeway of the sortedValues.length % numberOfBins remaining values, we adapt to that using min().
+                // Then, since we have access to the sorted number line, we can just check which right interval end value falls under first
+                // and assign the bin based on that.
                 int thresholdIdx = Math.min((b + 1) * itemsPerBin - 1, sortedValues.length - 1);
                 if (value <= sortedValues[thresholdIdx]) {
                     assignedBin = b;
