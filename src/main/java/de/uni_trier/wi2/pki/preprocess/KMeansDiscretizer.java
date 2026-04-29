@@ -20,9 +20,7 @@ public class KMeansDiscretizer extends BinningDiscretizer {
      * @return the list of discretized examples.
      */
     public List<Object[]> discretize(int numberOfBins, List<Object[]> examples, int attributeId) {
-        if (examples == null || examples.isEmpty()) {
-            return examples;
-        }
+        if (examples == null || examples.isEmpty()) return examples;
 
         // 1. Extract values from the specified attribute column
         double[] values = new double[examples.size()];
@@ -33,32 +31,32 @@ public class KMeansDiscretizer extends BinningDiscretizer {
         // 2. Initialize centroids and prepare clustering
         double[] centroids = initializeCentroids(values, numberOfBins);
         int[] clusters = new int[values.length];
-        double epsilon = 0.001; // Convergence threshold from notes
+        final double EPSILON = 0.001; // Reasonable convergence threshold
         boolean converged = false;
 
         // 3. Iterative clustering process
         while (!converged) {
             double[] oldCentroids = centroids.clone();
 
-            // 4.2. Assign each value to the nearest centroid
+            // 3.1. Assign each value to the nearest centroid
             for (int i = 0; i < values.length; i++) {
                 clusters[i] = findNearestCentroid(values[i], centroids);
             }
 
-            // 4.3. Recalculate centroids based on the average of assigned values
+            // 3.2. Recalculate centroids based on the average of assigned values
             centroids = calculateNewCentroids(values, clusters, numberOfBins);
 
-            // 4.4. Check for convergence (if centroids stopped moving significantly)
+            // 3.3. Check for convergence (if centroids stopped moving significantly)
             double totalShift = 0;
             for (int i = 0; i < centroids.length; i++) {
                 totalShift += Math.abs(centroids[i] - oldCentroids[i]);
             }
-            if (totalShift < epsilon) {
+            if (totalShift < EPSILON) {
                 converged = true;
             }
         }
 
-        // 5. Update the original examples with the cluster labels
+        // 4. Update the original examples with the cluster labels
         for (int i = 0; i < examples.size(); i++) {
             examples.get(i)[attributeId] = "Cluster" + clusters[i];
         }
@@ -77,6 +75,8 @@ public class KMeansDiscretizer extends BinningDiscretizer {
     private double[] initializeCentroids(double[] values, int numberOfBins) {
         double[] centroids = new double[numberOfBins];
         // Distribute initial centroids evenly across the dataset as a starting point
+        // The unsorted nature of values allows for randomness in terms of which data points end up in the position of our centroids.
+        // Additionally, this approach ensures determinism which is important for reproduction of results.
         for (int i = 0; i < numberOfBins; i++) {
             int index = i * (values.length / numberOfBins);
             centroids[i] = values[index];

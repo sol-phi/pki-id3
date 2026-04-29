@@ -21,7 +21,7 @@ public class EqualFrequencyDiscretization extends BinningDiscretizer {
      */
     @Override
     public List<Object[]> discretize(int numberOfBins, List<Object[]> examples, int attributeId) {
-        if (examples.isEmpty()) return examples;
+        if (examples == null || examples.isEmpty()) return examples;
 
         // 1. Collect all values and sort them to find frequency thresholds
         double[] sortedValues = new double[examples.size()];
