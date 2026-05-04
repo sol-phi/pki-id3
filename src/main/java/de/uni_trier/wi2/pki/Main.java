@@ -71,7 +71,7 @@ public class Main {
         for (int i = 0; i < attributesToDiscretize.size(); i++) {
             // ONLY discretize if it's a number AND NOT the label column
             if (attributesToDiscretize.get(i) && i != LABEL_ATTR_INDEX) {
-                examples = discretizer.discretize(3, examples, i);
+                examples = discretizer.discretize(NUMBER_OF_BINS, examples, i);
             }
         }
 
