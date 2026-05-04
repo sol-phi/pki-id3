@@ -6,10 +6,11 @@ import de.uni_trier.wi2.pki.tree.DecisionTreeNode;
 
 import java.util.*;
 
+
 /**
  * Utility class for creating a decision tree with the ID3 algorithm.
  */
-public class ID3Utils {
+public class ID3Utils_Test {
 
     /**
      * Create the decision tree given the example and the index of the label attribute.
@@ -41,20 +42,23 @@ public class ID3Utils {
         // If no examples are received, adapt the class that is most appropriate in the parent node
         if (examples == null || examples.isEmpty()) {
             String className = getDominantClass(parent.getElements(), labelIndex);
+//            System.out.println("isEmptyClass: " + className);
             return new DecisionTreeLeafNode(parent, examples, className);
         }
 
         // If the maximum depth has been reached, stop the recursive splitting and instead return the most appropriate class for the current set of examples.
         // As currentDepth is 1, this if-block can only be entered on recursive calls,
         // which is why returning DecisionTreeLeafNode is safe in terms of the (DecisionTree) cast.
-        if (maximumDepth >= 1 && currentDepth > maximumDepth) {
+        if (maximumDepth >= 1 && currentDepth >= maximumDepth) {
             String className = getDominantClass(examples, labelIndex);
+//            System.out.println("maximumDepthClass: " + className);
             return new DecisionTreeLeafNode(parent, examples, className);
         }
 
-        // If all instances in examples belong to the same class C, return a leaf node that is marked with C.
+        // if all instances in example belong to the same class C, return a leaf node that is marked with C.
         String pureClassName = checkForPureClass(examples, labelIndex);
         if (!(pureClassName == null)) {
+//            System.out.println("PureClass: " + pureClassName);
             return new DecisionTreeLeafNode(parent, examples, pureClassName);
         }
 
@@ -84,11 +88,18 @@ public class ID3Utils {
             subsets.computeIfAbsent(efficientAttributeValue, k -> new ArrayList<>()).add(row);
         }
 
+//        System.out.println(currentDepth);
+
         // Then, call createTree recursively with E[1] through E[N].
         // childNode represents T[1] through T[N] and is added to efficientAttributeNode A one by one, eliminating the need to store T[1] through T[N] all at once.
         for (Map.Entry<Object, List<Object[]>> subset : subsets.entrySet()) {
             DecisionTreeNode childNode = createTree(subset.getValue(), labelIndex, maximumDepth, currentDepth + 1, efficientAttributeNode);
             efficientAttributeNode.addSplit(subset.getKey().toString(), childNode);
+
+//            System.out.println("Value: " + subset.getKey() + " - " + subset.getValue().size() + " examples");
+//            for (Object[] row : subset.getValue()) {
+//                System.out.println("  " + Arrays.toString(row));
+//            }
         }
 
         // Climbing the recursion back up, return a tree that has A as the root node and the trees T1 through TN extending that root node.
@@ -105,6 +116,9 @@ public class ID3Utils {
     public static int selectEfficientAttribute(Collection<Object[]> examples, int labelIndex) {
         // Retrieve the information gain of every single attribute
         List<Double> informationGains = EntropyUtils.calcInformationGain(examples, labelIndex);
+
+//        System.out.println(informationGains.indexOf(Collections.max(informationGains)));
+
         // Extract the highest information gain and return the index of the attribute that belongs to it.
         // If every attribute has only one unique value for all data points in examples, return a warning in the form of -1
         double maxInformationGain = Collections.max(informationGains);
@@ -128,25 +142,27 @@ public class ID3Utils {
             absoluteClassFrequencies.merge(classValue, 1, Integer::sum);
         }
 
+//        absoluteClassFrequencies.forEach((label, count) ->
+//                System.out.println("Class " + label + ": " + count)
+//        );
+//        System.out.println("Dominant class: " + Collections.max(absoluteClassFrequencies.entrySet(), Map.Entry.comparingByValue()).getKey() + "");
+
+
         // Extract the class with the most entries in examples
         return Collections.max(absoluteClassFrequencies.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
     public static String checkForPureClass(Collection<Object[]> examples, int labelIndex) {
-        List<Object[]> data = new ArrayList<>(examples); // Required for data.get()
+        List<Object[]> data = new ArrayList<>(examples);
 
-        // Set initialClassValue to the very last class value,
-        // so that the for loop does not make an unnecessary comparison between initialClassValue and itself,
-        // unless that class is actually pure
         String initialClassValue = data.get(data.size() - 1)[labelIndex].toString();
 
-        // If there are at least two different class values in examples, return "false"
         for (Object[] row : data) {
             if (!row[labelIndex].toString().equals(initialClassValue)) {
                 return null;
             }
         }
-        // Otherwise return the name of the pure class to be used for constructing a leaf node
+
         return initialClassValue;
     }
 

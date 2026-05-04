@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Contains methods that help with computing the entropy.
  */
-public class EntropyUtils {
+public class EntropyUtilsTest {
 
 
 
@@ -44,17 +44,24 @@ public class EntropyUtils {
 
         // Runs through every row and tracks class value frequencies. A map is used here because that is simpler than doing it with a long[]
         Map<String, Long> absoluteClassFrequencies = new HashMap<>();
+//        System.out.println("--------");
         for (Object[] row : matrix) {
-            String classValue = row[labelIndex].toString();
+            String label = row[labelIndex].toString();
             // If not present, create an entry set to 1, with the key classValue. Otherwise, overwrite classValue with classValue + 1
-            absoluteClassFrequencies.merge(classValue, 1L, Long::sum);
+            absoluteClassFrequencies.merge(label, 1L, Long::sum);
         }
+
+//        absoluteClassFrequencies.forEach((label, count) ->
+//                System.out.println("Class " + label + ": " + count)
+//        );
 
         // Converts the map into a long[], for calculateEntropy(). classValues are lost in the process,
         // but for the entropy calculation, it's irrelevant which classes the frequencies belong to
         long[] counts = absoluteClassFrequencies.values().stream()
                 .mapToLong(Long::longValue)
                 .toArray();
+
+//        System.out.println(Arrays.toString(counts));
 
         // H(E) - R(A)
         return calculateEntropy(counts) - calculateRestEntropyForAttribute(attributeIndex, matrix, labelIndex);
@@ -100,9 +107,14 @@ public class EntropyUtils {
         // R(A) = weighted sum of entropies of subsets
         // P(A = w[i]) * H(E[i]) is added to the entropy, one by one for every element, forming the sum.
         double residualEntropy = 0;
-        for (Map.Entry<Object, List<Object[]>> entry : subsets.entrySet()) {
-            double probability = (double) entry.getValue().size() / matrix.size();
-            residualEntropy += probability * calculateEntropyForAttributeValue(attributeIndex, matrix, entry.getKey(), labelIndex);
+        for (Map.Entry<Object, List<Object[]>> subset : subsets.entrySet()) {
+            double probability = (double) subset.getValue().size() / matrix.size();
+            residualEntropy += probability * calculateEntropyForAttributeValue(attributeIndex, matrix, subset.getKey(), labelIndex);
+
+//            System.out.println("Value: " + subset.getKey() + " - " + subset.getValue().size() + " examples");
+//            for (Object[] row : subset.getValue()) {
+//                System.out.println("  " + Arrays.toString(row));
+//            }
         }
 
         return residualEntropy;

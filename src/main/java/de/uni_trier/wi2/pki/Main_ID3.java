@@ -1,22 +1,16 @@
 package de.uni_trier.wi2.pki;
 
 import de.uni_trier.wi2.pki.io.CSVReader;
-import de.uni_trier.wi2.pki.io.XMLWriter;
-import de.uni_trier.wi2.pki.postprocess.CrossValidator;
-import de.uni_trier.wi2.pki.postprocess.ReducedErrorPruner;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
-import de.uni_trier.wi2.pki.preprocess.EqualFrequencyDiscretization;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
-import de.uni_trier.wi2.pki.preprocess.KMeansDiscretizer;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
-import de.uni_trier.wi2.pki.util.EntropyUtils;
-import de.uni_trier.wi2.pki.util.ID3Utils;
+import de.uni_trier.wi2.pki.util.ID3Utils_Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+public class Main_ID3 {
 
     public static void main(String[] args) {
         // some constants
@@ -81,8 +75,8 @@ public class Main {
             }
         }
 
-        DecisionTree decisionTree = ID3Utils.createTree(examples, LABEL_ATTR_INDEX);
-        ID3Utils.printTree(decisionTree, "");
+        DecisionTree decisionTree = ID3Utils_Test.createTree(examples, LABEL_ATTR_INDEX);
+        ID3Utils_Test.printTree(decisionTree, "");
 
     }
 

@@ -1,22 +1,14 @@
 package de.uni_trier.wi2.pki;
 
 import de.uni_trier.wi2.pki.io.CSVReader;
-import de.uni_trier.wi2.pki.io.XMLWriter;
-import de.uni_trier.wi2.pki.postprocess.CrossValidator;
-import de.uni_trier.wi2.pki.postprocess.ReducedErrorPruner;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
-import de.uni_trier.wi2.pki.preprocess.EqualFrequencyDiscretization;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
-import de.uni_trier.wi2.pki.preprocess.KMeansDiscretizer;
-import de.uni_trier.wi2.pki.tree.DecisionTree;
-import de.uni_trier.wi2.pki.util.EntropyUtils;
-import de.uni_trier.wi2.pki.util.ID3Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+public class Main_Discretization {
 
     public static void main(String[] args) {
         // some constants
@@ -27,6 +19,9 @@ public class Main {
         List<String[]> parsedLines = null;
         try { // "target/classes/" corresponds to "src/main/resources/"
             parsedLines = CSVReader.readCsvToArray("target/classes/" + FILE_NAME, ";", true);
+
+//            // Debug print to peek the data just read
+//            parsedLines.subList(0, 9).forEach(line -> System.out.printf(("%-13s| ".repeat(line.length) + "%n"), (Object[]) line));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -81,9 +76,20 @@ public class Main {
             }
         }
 
-        DecisionTree decisionTree = ID3Utils.createTree(examples, LABEL_ATTR_INDEX);
-        ID3Utils.printTree(decisionTree, "");
+        // --- TEST OUTPUT ---
+        System.out.println("--- DISCRETIZATION TEST ---");
+        System.out.println("Printing the first 100 students to check results:");
 
+        // We look at Index 2 (Age) and Index 29 (Absences) because they were 'true' (continuous)
+        for (int i = 0; i < examples.size(); i++) {
+            Object[] row = examples.get(i);
+            System.out.println("Student " + (i+1) + ": " +
+                    "Age=" + row[2] + " | " +
+                    "Absences=" + row[29] + " | " +
+                    "Studytime=" + row[13] + " | " +
+                    "G3 (Label)=" + row[32]);
+        }
+        System.out.println("---------------------------");
     }
 
 }
