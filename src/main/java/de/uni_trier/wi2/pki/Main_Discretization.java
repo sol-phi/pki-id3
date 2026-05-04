@@ -6,6 +6,7 @@ import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main_Discretization {
@@ -78,16 +79,9 @@ public class Main_Discretization {
 
         // --- TEST OUTPUT ---
         System.out.println("--- DISCRETIZATION TEST ---");
-        System.out.println("Printing the first 100 students to check results:");
-
-        // We look at Index 2 (Age) and Index 29 (Absences) because they were 'true' (continuous)
         for (int i = 0; i < examples.size(); i++) {
             Object[] row = examples.get(i);
-            System.out.println("Student " + (i+1) + ": " +
-                    "Age=" + row[2] + " | " +
-                    "Absences=" + row[29] + " | " +
-                    "Studytime=" + row[13] + " | " +
-                    "G3 (Label)=" + row[32]);
+            System.out.println(Arrays.toString(row));
         }
         System.out.println("---------------------------");
     }

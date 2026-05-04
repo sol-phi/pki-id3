@@ -13,8 +13,7 @@ import de.uni_trier.wi2.pki.util.EntropyUtils;
 import de.uni_trier.wi2.pki.util.ID3Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Main {
 
@@ -22,6 +21,7 @@ public class Main {
         // some constants
         final String FILE_NAME = "student-mat.csv";
         final int LABEL_ATTR_INDEX = 32;
+        final int NUMBER_OF_BINS = 3;
 
         // parse CSV data
         List<String[]> parsedLines = null;
@@ -31,52 +31,46 @@ public class Main {
             e.printStackTrace();
         }
 
-        // define data types of the dataset (matching the 33 columns of student-mat.csv)
-        ArrayList<Boolean> attrIsContinuous = new ArrayList<>();
-        attrIsContinuous.add(false); // 0: school ("GP")
-        attrIsContinuous.add(false); // 1: sex ("F")
-        attrIsContinuous.add(true);  // 2: age (18)
-        attrIsContinuous.add(false); // 3: address ("U")
-        attrIsContinuous.add(false); // 4: famsize ("GT3")
-        attrIsContinuous.add(false); // 5: Pstatus ("A")
-        attrIsContinuous.add(true);  // 6: Medu (4)
-        attrIsContinuous.add(true);  // 7: Fedu (4)
-        attrIsContinuous.add(false); // 8: Mjob ("at_home")
-        attrIsContinuous.add(false); // 9: Fjob ("teacher")
-        attrIsContinuous.add(false); // 10: reason ("course")
-        attrIsContinuous.add(false); // 11: guardian ("mother")
-        attrIsContinuous.add(true);  // 12: traveltime (2)
-        attrIsContinuous.add(true);  // 13: studytime (2)
-        attrIsContinuous.add(true);  // 14: failures (0)
-        attrIsContinuous.add(false); // 15: schoolsup ("yes")
-        attrIsContinuous.add(false); // 16: famsup ("no")
-        attrIsContinuous.add(false); // 17: paid ("no")
-        attrIsContinuous.add(false); // 18: activities ("no")
-        attrIsContinuous.add(false); // 19: nursery ("yes")
-        attrIsContinuous.add(false); // 20: higher ("yes")
-        attrIsContinuous.add(false); // 21: internet ("no")
-        attrIsContinuous.add(false); // 22: romantic ("no")
-        attrIsContinuous.add(true);  // 23: famrel (4)
-        attrIsContinuous.add(true);  // 24: freetime (3)
-        attrIsContinuous.add(true);  // 25: goout (4)
-        attrIsContinuous.add(true);  // 26: Dalc (1)
-        attrIsContinuous.add(true);  // 27: Walc (1)
-        attrIsContinuous.add(true);  // 28: health (3)
-        attrIsContinuous.add(true);  // 29: absences (6)
-        attrIsContinuous.add(true);  // 30: G1 ("5")
-        attrIsContinuous.add(true);  // 31: G2 ("6")
-        attrIsContinuous.add(true);  // 32: G3 (6)
-
         // 1. Convert List<String[]> to List<Object[]> as required by the discretizers
         List<Object[]> examples = new ArrayList<>(parsedLines);
+
+        // The value for a specific attribute can be located through the attribute's index from examples.
+        ArrayList<Boolean> attributesToDiscretize = new ArrayList<>();
+        // Checks every attribute for whether it should be discretized by running through examples ↓, then →
+        // Discretizability of an attribute is defined here as being numeric, and to prevent redundant binning, as having more unique values than bins.
+        for (int i = 0; i < examples.get(0).length; i++) {
+            Set<String> uniqueValues = new HashSet<>();
+            boolean isNumeric = true;
+
+            // Runs through the attribute column.
+            // Since there might be a lot of rows, this approach minimizes runtime by aborting once the discretizability of the attribute is known
+            for (Object[] row : examples) {
+                String val = row[i].toString();
+                // Attempts numeric conversion. If it fails, not discretizable, regardless of unique values
+                try {
+                    Double.parseDouble(val);
+                } catch (NumberFormatException e) {
+                    isNumeric = false;
+                    break;
+                }
+                // To arrive here, the attribute must have been numeric
+                // Checks for the amount of unique values recorded so far.
+                // If greater than the number of bins, the second condition is fulfilled too -> discretizable.
+                uniqueValues.add(val);
+                if (uniqueValues.size() > NUMBER_OF_BINS) break;
+            }
+
+            boolean isDiscretizable = isNumeric && uniqueValues.size() > NUMBER_OF_BINS;
+            attributesToDiscretize.add(isDiscretizable);
+        }
 
         // 2. Pick a discretizer (e.g., EqualWidth)
         BinningDiscretizer discretizer = new EqualWidthDiscretization();
 
         // 3. Process all columns that are marked as continuous (true)
-        for (int i = 0; i < attrIsContinuous.size(); i++) {
+        for (int i = 0; i < attributesToDiscretize.size(); i++) {
             // ONLY discretize if it's a number AND NOT the label column
-            if (attrIsContinuous.get(i) && i != LABEL_ATTR_INDEX) {
+            if (attributesToDiscretize.get(i) && i != LABEL_ATTR_INDEX) {
                 examples = discretizer.discretize(3, examples, i);
             }
         }
