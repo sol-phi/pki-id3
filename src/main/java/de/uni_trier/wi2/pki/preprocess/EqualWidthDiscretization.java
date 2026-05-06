@@ -33,21 +33,6 @@ public class EqualWidthDiscretization extends BinningDiscretizer {
             if (value > max) max = value;
         }
 
-        /*
-         * Calculation of the bin index
-         * Example with age (min=15, max=22, bins=3):
-         * ------------------------------------
-         * Formula: index = (value - min) / interval width.
-         * Interval width = (22 - 15) / 3 = 2.333
-         * 1. For value 15: (15 - 15) / 2.333 = 0.0   -> (int)0 -> Bin0
-         * 2. For value 17: (17 - 15) / 2.333 = 0.857 -> (int)0 -> Bin0
-         * 3. For value 18: (18 - 15) / 2.333 = 1.286 -> (int)1 -> Bin1
-         * 4. For value 21: (21 - 15) / 2.333 = 2.571 -> (int)2 -> Bin2
-         * 5. For value 22: (22 - 15) / 2.333 = 3.0   -> (int)3 -> if(3>=3) -> Bin2
-         * This generates intervals that are left-inclusive and right-exclusive.
-         * Because of this, if the value is max, it lands on the right end of the last interval, barely excluded.
-         * To deal with this, we check for that case and make the last interval inclusive on both sides.
-         */
 
         // 2. Calculate how wide each bin is
         double binWidth = (max - min) / numberOfBins;

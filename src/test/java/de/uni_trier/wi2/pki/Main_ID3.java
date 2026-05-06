@@ -4,7 +4,7 @@ import de.uni_trier.wi2.pki.io.CSVReader;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
-import de.uni_trier.wi2.pki.util.ID3Utils_Test;
+import de.uni_trier.wi2.pki.util.ID3Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,8 +75,8 @@ public class Main_ID3 {
             }
         }
 
-        DecisionTree decisionTree = ID3Utils_Test.createTree(examples, LABEL_ATTR_INDEX);
-        ID3Utils_Test.printTree(decisionTree, "");
+        DecisionTree decisionTree = ID3Utils.createTree(examples, LABEL_ATTR_INDEX);
+        ID3Utils.printTree(decisionTree, "");
 
     }
 
