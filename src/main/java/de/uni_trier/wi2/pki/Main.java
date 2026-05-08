@@ -82,6 +82,12 @@ public class Main {
         );
         ID3Utils.printTree(bestDecisionTree);
 
+        try {
+            XMLWriter.writeXML("target/classes/decision-tree.xml", bestDecisionTree);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
