@@ -159,10 +159,25 @@ public class ID3Utils {
      * @return the classification accuracy.
      */
     public static double getClassificationAccuracy(DecisionTree decisionTree, Collection<Object[]> validationExamples, int labelIndex) {
-        return 0.0;
+        // Predicts every testData example individually, and assess how many were correct out of all examples.
+
+        List<Object[]> testData = new ArrayList<>(validationExamples);
+        List<String> results = decisionTree.predictAll(testData);
+
+        int correctExamplesCount = 0;
+        for (int i = 0; i < results.size(); i++) {
+            String classValue = testData.get(i)[labelIndex].toString();
+            if (classValue.equals(results.get(i))) correctExamplesCount++;
+        }
+
+        return (double) correctExamplesCount / testData.size();
     }
 
     // A recursive method that starts at the root node and moves down, printing everything in its way
+    public static void printTree(DecisionTreeNode node) {
+        printTree(node, "");
+    }
+
     public static void printTree(DecisionTreeNode node, String indent) {
         if (node instanceof DecisionTreeLeafNode) {
             System.out.println(indent + "→ Class: " + ((DecisionTreeLeafNode) node).getLabelClass());

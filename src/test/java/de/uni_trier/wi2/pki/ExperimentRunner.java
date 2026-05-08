@@ -1,6 +1,7 @@
 package de.uni_trier.wi2.pki;
 
 import de.uni_trier.wi2.pki.io.CSVReader;
+import de.uni_trier.wi2.pki.postprocess.CrossValidator;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
@@ -24,7 +25,9 @@ public class ExperimentRunner {
 
             //runDiscretizationDemo();
 
-            runId3TreeDemo();
+            //runId3TreeDemo();
+
+            runCrossValidationDemo();
 
         } catch (IOException e) {
             System.err.println("Error loading data: " + e.getMessage());
@@ -70,8 +73,23 @@ public class ExperimentRunner {
 
         // 2. Build and print the tree
         DecisionTree decisionTree = ID3Utils.createTree(examples, LABEL_ATTR_INDEX);
-        ID3Utils.printTree(decisionTree, "");
+        ID3Utils.printTree(decisionTree);
     }
+
+    private static void runCrossValidationDemo() throws IOException {
+        System.out.println("\n--- CROSS VALIDATION ---");
+        List<Object[]> examples = getPreparedData();
+        BinningDiscretizer discretizer = new EqualWidthDiscretization();
+
+        // 1. Discretize continuous values
+        examples = applyDiscretization(examples, discretizer);
+
+        // 2. Cross validate and print the best tree for comparison
+        DecisionTree result = CrossValidator.performCrossValidation(examples, LABEL_ATTR_INDEX, ID3Utils::createTree, 5);
+        ID3Utils.printTree(result);
+    }
+
+
 
     // --- Helper methods to reduce redundancy ---
 

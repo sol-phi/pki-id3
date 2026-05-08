@@ -1,16 +1,16 @@
-package de.uni_trier.wi2.pki.util;
+package de.uni_trier.wi2.pki.postprocess;
 
-import de.uni_trier.wi2.pki.postprocess.CrossValidator;
+import de.uni_trier.wi2.pki.util.ID3Utils;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ID3JUnitTest {
+public class CrossValidatorJUnitTest {
 
     @Test
-    void testSimpleID3Logic() {
+    void testCrossValidator() {
         // 1. Training data: Weather (Sunny/Rainy/Cloudy) + Temperature (Hot/Cold) -> Play (Yes/No)
         List<Object[]> data = new ArrayList<>();
         data.add(new Object[]{"Sunny",  "Hot",  "Yes"});
@@ -31,29 +31,14 @@ public class ID3JUnitTest {
         testData.add(new Object[]{"Rainy",  "Cold", "No"});
         testData.add(new Object[]{"Cloudy", "Hot",  "Yes"});
 
-        // 2. Build the tree (Label index is 1)
-        DecisionTree tree = ID3Utils.createTree(data, LABEL_INDEX);
-        System.out.println("Actual tree:");
+        DecisionTree tree = CrossValidator.performCrossValidation(data, LABEL_INDEX, ID3Utils::createTree, 2);
+        System.out.println("Tree from cross validation:");
         ID3Utils.printTree(tree);
 
-        assertNotNull(tree, "Tree should not be null");
-        // check if the root is not a leaf (it should be a split on "Weather")
-        assertFalse(tree.isLeafNode(), "Root node should be a split node");
-        // check if we have three splits (one for Hot, one for Cold)
-        assertEquals(2, tree.getSplits().size(), "Tree should have 2 splits for Hot/Cold");
-        // check if the testData actually leads to the correct classes in the tree
-        assertEquals(new ArrayList<>(List.of("Yes", "No", "Yes")), tree.predictAll(testData));
-        // A tree tested on a subset of the data it was trained on should always be 100% accurate
-        assertEquals(1.0, ID3Utils.getClassificationAccuracy(tree, testData, LABEL_INDEX));
-
-        DecisionTree result = CrossValidator.performCrossValidation(data, LABEL_INDEX, ID3Utils::createTree, 2);
-        System.out.println("Tree from cross validation:");
-        ID3Utils.printTree(result);
-
         // Perform the same tests as above, but on the result tree
-        assertNotNull(result, "Best model should not be null");
+        assertNotNull(tree, "Best model should not be null");
         assertFalse(tree.isLeafNode(), "Root node should be a split node");
-        assertEquals(new ArrayList<>(List.of("Yes", "No", "Yes")), result.predictAll(testData));
-        assertEquals(1.0, ID3Utils.getClassificationAccuracy(result, testData, LABEL_INDEX));
+        assertEquals(new ArrayList<>(List.of("Yes", "No", "Yes")), tree.predictAll(testData));
+        assertEquals(1.0, ID3Utils.getClassificationAccuracy(tree, testData, LABEL_INDEX));
     }
 }

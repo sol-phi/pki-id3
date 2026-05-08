@@ -9,7 +9,6 @@ import de.uni_trier.wi2.pki.preprocess.EqualFrequencyDiscretization;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
 import de.uni_trier.wi2.pki.preprocess.KMeansDiscretizer;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
-import de.uni_trier.wi2.pki.util.EntropyUtils;
 import de.uni_trier.wi2.pki.util.ID3Utils;
 
 import java.io.IOException;
@@ -75,8 +74,13 @@ public class Main {
             }
         }
 
-        DecisionTree decisionTree = ID3Utils.createTree(examples, LABEL_ATTR_INDEX);
-        ID3Utils.printTree(decisionTree, "");
+        DecisionTree bestDecisionTree = CrossValidator.performCrossValidation(
+                examples,
+                LABEL_ATTR_INDEX,
+                ID3Utils::createTree,
+                5
+        );
+        ID3Utils.printTree(bestDecisionTree);
 
     }
 
