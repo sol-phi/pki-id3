@@ -74,16 +74,38 @@ public class Main {
             }
         }
 
+        System.out.println("--- DECISION TREE --");
         DecisionTree bestDecisionTree = CrossValidator.performCrossValidation(
                 examples,
                 LABEL_ATTR_INDEX,
                 ID3Utils::createTree,
                 5
         );
-        ID3Utils.printTree(bestDecisionTree);
 
         try {
             XMLWriter.writeXML("target/classes/decision-tree.xml", bestDecisionTree);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("--- PRUNED DECISION TREE --");
+        DecisionTree bestPrunedDecisionTree = CrossValidator.performCrossValidation(
+                examples,
+                LABEL_ATTR_INDEX,
+                (trainData, labelIndex) -> {
+                    // 20% are validation data
+                    List<Object[]> constructionData = trainData.subList(0, (int)(trainData.size() * 0.8));
+                    List<Object[]> validationData = trainData.subList((int)(trainData.size() * 0.8), trainData.size());
+
+                    DecisionTree tree = ID3Utils.createTree(constructionData, labelIndex);
+                    new ReducedErrorPruner().prune(tree, validationData, labelIndex);
+                    return tree;
+                },
+                5
+        );
+
+        try {
+            XMLWriter.writeXML("target/classes/pruned-decision-tree.xml", bestPrunedDecisionTree);
         } catch (IOException e) {
             e.printStackTrace();
         }

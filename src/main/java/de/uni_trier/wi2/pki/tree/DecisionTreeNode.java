@@ -51,6 +51,8 @@ public class DecisionTreeNode {
 
     public void addSplit(String Object, DecisionTreeNode decisionTreeNode) {
         splits.put(Object, decisionTreeNode);
+        // Required for bottom-up run-throughs of the decision tree
+        decisionTreeNode.parent = this;
     }
 
     /**

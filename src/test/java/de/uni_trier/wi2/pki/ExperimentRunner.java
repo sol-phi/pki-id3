@@ -2,6 +2,7 @@ package de.uni_trier.wi2.pki;
 
 import de.uni_trier.wi2.pki.io.CSVReader;
 import de.uni_trier.wi2.pki.postprocess.CrossValidator;
+import de.uni_trier.wi2.pki.postprocess.ReducedErrorPruner;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
@@ -21,13 +22,15 @@ public class ExperimentRunner {
         try {
             // --- Toggle methods here to see specific outputs ---
 
-            //runMinMaxAnalysis(2); // Example: Column "age"
+//            runMinMaxAnalysis(2); // Example: Column "age"
 
-            //runDiscretizationDemo();
+//            runDiscretizationDemo();
 
-            //runId3TreeDemo();
+//            runId3TreeDemo();
 
-            runCrossValidationDemo();
+//            runCrossValidationDemo();
+
+            runReducedErrorPrunerDemo();
 
         } catch (IOException e) {
             System.err.println("Error loading data: " + e.getMessage());
@@ -89,6 +92,31 @@ public class ExperimentRunner {
         ID3Utils.printTree(result);
     }
 
+    private static void runReducedErrorPrunerDemo() throws IOException {
+        System.out.println("\n--- REDUCED ERROR PRUNING ---");
+        List<Object[]> examples = getPreparedData();
+        BinningDiscretizer discretizer = new EqualWidthDiscretization();
+
+        // 1. Discretize continuous values
+        examples = applyDiscretization(examples, discretizer);
+
+        // 2. Cross validate and print the best tree for comparison
+        DecisionTree bestPrunedDecisionTree = CrossValidator.performCrossValidation(
+                examples,
+                LABEL_ATTR_INDEX,
+                (trainData, labelIndex) -> {
+                    // 20% are validation data
+                    List<Object[]> constructionData = trainData.subList(0, (int)(trainData.size() * 0.8));
+                    List<Object[]> validationData = trainData.subList((int)(trainData.size() * 0.8), trainData.size());
+
+                    DecisionTree tree = ID3Utils.createTree(constructionData, labelIndex);
+                    new ReducedErrorPruner().prune(tree, validationData, labelIndex);
+                    return tree;
+                },
+                5
+        );
+        ID3Utils.printTree(bestPrunedDecisionTree);
+    }
 
 
     // --- Helper methods to reduce redundancy ---
