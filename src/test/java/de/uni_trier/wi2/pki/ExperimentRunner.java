@@ -31,10 +31,10 @@ public class ExperimentRunner {
 
 //            runId3TreeDemo();
 
-  //          runCrossValidationDemo();
+      //      runCrossValidationDemo();
 
-    //        runReducedErrorPrunerDemo();
-            runFullOptimizationTest();
+            runReducedErrorPrunerDemo();
+      //      runFullOptimizationTest();
 
         } catch (IOException e) {
             System.err.println("Error loading data: " + e.getMessage());
@@ -151,11 +151,11 @@ public class ExperimentRunner {
 
 
     private static void runFullOptimizationTest() throws IOException {
-        System.out.println("\n=========================================================");
-        System.out.println("       ERGEBNISSE: DISKRETISIERUNG & ACCURACY");
-        System.out.println("=========================================================");
-        System.out.printf("%-20s | %-5s | %-15s%n", "Methode", "Bins", "Avg. Accuracy");
-        System.out.println("---------------------------------------------------------");
+        System.out.println("\n========================================================================");
+        System.out.println("       VERGLEICH: DISKRETISIERUNG | OHNE PRUNING vs. MIT PRUNING");
+        System.out.println("========================================================================");
+        System.out.printf("%-18s | %-4s | %-15s | %-15s%n", "Methode", "Bins", "Accuracy (Raw)", "Accuracy (Pruned)");
+        System.out.println("------------------------------------------------------------------------");
 
         int[] binValues = {2, 3, 5, 10, 20};
         List<BinningDiscretizer> discretizers = Arrays.asList(
@@ -167,34 +167,43 @@ public class ExperimentRunner {
         for (BinningDiscretizer discretizer : discretizers) {
             for (int bins : binValues) {
                 List<Object[]> examples = getPreparedData();
-
-                // 1. Diskretisierung anwenden
                 examples = applyCustomDiscretization(examples, discretizer, bins);
 
-                // 2. Cross-Validation manuell steuern für korrekte Statistik
                 int numFolds = 5;
                 Collections.shuffle(examples, new java.util.Random(0));
-                double[] accuracies = new double[numFolds];
+                double[] rawAccs = new double[numFolds];
+                double[] prunedAccs = new double[numFolds];
 
                 for (int i = 0; i < numFolds; i++) {
                     int from = i * examples.size() / numFolds;
                     int to = (i + 1) * examples.size() / numFolds;
 
                     List<Object[]> testData = examples.subList(from, to);
-                    List<Object[]> trainingData = new ArrayList<>(examples);
-                    trainingData.removeAll(testData);
+                    List<Object[]> trainDataFull = new ArrayList<>(examples);
+                    trainDataFull.removeAll(testData);
 
-                    DecisionTree tree = ID3Utils.createTree(trainingData, LABEL_ATTR_INDEX);
-                    accuracies[i] = ID3Utils.getClassificationAccuracy(tree, testData, LABEL_ATTR_INDEX);
+                    // --- 1. Accuracy OHNE Pruning ---
+                    DecisionTree rawTree = ID3Utils.createTree(trainDataFull, LABEL_ATTR_INDEX);
+                    rawAccs[i] = ID3Utils.getClassificationAccuracy(rawTree, testData, LABEL_ATTR_INDEX);
+
+                    // --- 2. Accuracy MIT Pruning ---
+                    // Für Reduced Error Pruning brauchen wir ein separates Validierungset (ca. 20% vom Training)
+                    int splitIdx = (int) (trainDataFull.size() * 0.8);
+                    List<Object[]> buildData = trainDataFull.subList(0, splitIdx);
+                    List<Object[]> pruneValidationData = trainDataFull.subList(splitIdx, trainDataFull.size());
+
+                    DecisionTree treeToPrune = ID3Utils.createTree(buildData, LABEL_ATTR_INDEX);
+                    new ReducedErrorPruner().prune(treeToPrune, pruneValidationData, LABEL_ATTR_INDEX);
+                    prunedAccs[i] = ID3Utils.getClassificationAccuracy(treeToPrune, testData, LABEL_ATTR_INDEX);
                 }
 
-                double avgAcc = java.util.Arrays.stream(accuracies).average().orElse(0.0);
+                double avgRaw = java.util.Arrays.stream(rawAccs).average().orElse(0.0);
+                double avgPruned = java.util.Arrays.stream(prunedAccs).average().orElse(0.0);
 
-                // 3. Saubere Ausgabe
                 String name = discretizer.getClass().getSimpleName().replace("Discretization", "");
-                System.out.printf("%-20s | %-5d | %.2f%%%n", name, bins, avgAcc * 100);
+                System.out.printf("%-18s | %-4d | %-15.2f%% | %-15.2f%%%n", name, bins, avgRaw * 100, avgPruned * 100);
             }
-            System.out.println("---------------------------------------------------------");
+            System.out.println("------------------------------------------------------------------------");
         }
     }
 

@@ -20,7 +20,7 @@ public class Main {
         // some constants
         final String FILE_NAME = "student-mat.csv";
         final int LABEL_ATTR_INDEX = 32;
-        final int NUMBER_OF_BINS = 3;
+        final int NUMBER_OF_BINS = 5;
 
         // parse CSV data
         List<String[]> parsedLines = null;
@@ -64,7 +64,7 @@ public class Main {
         }
 
         // 2. Pick a discretizer (e.g., EqualWidth)
-        BinningDiscretizer discretizer = new EqualWidthDiscretization();
+        BinningDiscretizer discretizer = new EqualFrequencyDiscretization();
                 ;
 
         // 3. Process all columns that are marked as continuous (true)
