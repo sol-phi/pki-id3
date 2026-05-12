@@ -32,7 +32,9 @@ public class CSVReader {
 
             String line;
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(delimiter);
+                // The -1 makes sure that empty values ("") in the data set receive their own array entry,
+                // instead of being skipped, which would have led to variable array length
+                String[] values = line.split(delimiter, -1);
 
                 // clean data and values
                 cleanValues(values);
