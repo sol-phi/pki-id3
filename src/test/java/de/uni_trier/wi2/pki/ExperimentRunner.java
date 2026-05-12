@@ -4,13 +4,16 @@ import de.uni_trier.wi2.pki.io.CSVReader;
 import de.uni_trier.wi2.pki.postprocess.CrossValidator;
 import de.uni_trier.wi2.pki.postprocess.ReducedErrorPruner;
 import de.uni_trier.wi2.pki.preprocess.BinningDiscretizer;
+import de.uni_trier.wi2.pki.preprocess.EqualFrequencyDiscretization;
 import de.uni_trier.wi2.pki.preprocess.EqualWidthDiscretization;
+import de.uni_trier.wi2.pki.preprocess.KMeansDiscretizer;
 import de.uni_trier.wi2.pki.tree.DecisionTree;
 import de.uni_trier.wi2.pki.util.ID3Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ExperimentRunner {
@@ -22,15 +25,16 @@ public class ExperimentRunner {
         try {
             // --- Toggle methods here to see specific outputs ---
 
-//            runMinMaxAnalysis(2); // Example: Column "age"
+ //           runMinMaxAnalysis(29); // Example: Column "age"
 
 //            runDiscretizationDemo();
 
 //            runId3TreeDemo();
 
-//            runCrossValidationDemo();
+  //          runCrossValidationDemo();
 
-            runReducedErrorPrunerDemo();
+    //        runReducedErrorPrunerDemo();
+            runFullOptimizationTest();
 
         } catch (IOException e) {
             System.err.println("Error loading data: " + e.getMessage());
@@ -143,5 +147,65 @@ public class ExperimentRunner {
         Boolean[] map = {false, false, true, false, false, false, true, true, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true};
         isCont.addAll(Arrays.asList(map));
         return isCont;
+    }
+
+
+    private static void runFullOptimizationTest() throws IOException {
+        System.out.println("\n=========================================================");
+        System.out.println("       ERGEBNISSE: DISKRETISIERUNG & ACCURACY");
+        System.out.println("=========================================================");
+        System.out.printf("%-20s | %-5s | %-15s%n", "Methode", "Bins", "Avg. Accuracy");
+        System.out.println("---------------------------------------------------------");
+
+        int[] binValues = {2, 3, 5, 10, 20};
+        List<BinningDiscretizer> discretizers = Arrays.asList(
+                new EqualWidthDiscretization(),
+                new EqualFrequencyDiscretization(),
+                new KMeansDiscretizer()
+        );
+
+        for (BinningDiscretizer discretizer : discretizers) {
+            for (int bins : binValues) {
+                List<Object[]> examples = getPreparedData();
+
+                // 1. Diskretisierung anwenden
+                examples = applyCustomDiscretization(examples, discretizer, bins);
+
+                // 2. Cross-Validation manuell steuern für korrekte Statistik
+                int numFolds = 5;
+                Collections.shuffle(examples, new java.util.Random(0));
+                double[] accuracies = new double[numFolds];
+
+                for (int i = 0; i < numFolds; i++) {
+                    int from = i * examples.size() / numFolds;
+                    int to = (i + 1) * examples.size() / numFolds;
+
+                    List<Object[]> testData = examples.subList(from, to);
+                    List<Object[]> trainingData = new ArrayList<>(examples);
+                    trainingData.removeAll(testData);
+
+                    DecisionTree tree = ID3Utils.createTree(trainingData, LABEL_ATTR_INDEX);
+                    accuracies[i] = ID3Utils.getClassificationAccuracy(tree, testData, LABEL_ATTR_INDEX);
+                }
+
+                double avgAcc = java.util.Arrays.stream(accuracies).average().orElse(0.0);
+
+                // 3. Saubere Ausgabe
+                String name = discretizer.getClass().getSimpleName().replace("Discretization", "");
+                System.out.printf("%-20s | %-5d | %.2f%%%n", name, bins, avgAcc * 100);
+            }
+            System.out.println("---------------------------------------------------------");
+        }
+    }
+
+    private static List<Object[]> applyCustomDiscretization(List<Object[]> examples, BinningDiscretizer discretizer, int bins) {
+        ArrayList<Boolean> continuousMap = getContinuousAttributeMap();
+        for (int i = 0; i < continuousMap.size(); i++) {
+            // Diskretisiere nur, wenn es eine numerische Spalte und nicht das Label ist
+            if (continuousMap.get(i) && i != LABEL_ATTR_INDEX) {
+                examples = discretizer.discretize(bins, examples, i);
+            }
+        }
+        return examples;
     }
 }

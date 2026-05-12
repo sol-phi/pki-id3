@@ -65,6 +65,7 @@ public class Main {
 
         // 2. Pick a discretizer (e.g., EqualWidth)
         BinningDiscretizer discretizer = new EqualWidthDiscretization();
+                ;
 
         // 3. Process all columns that are marked as continuous (true)
         for (int i = 0; i < attributesToDiscretize.size(); i++) {
