@@ -27,14 +27,14 @@ public class ExperimentRunner {
 
  //           runMinMaxAnalysis(29); // Example: Column "age"
 
-//            runDiscretizationDemo();
+            runDiscretizationDemo();
 
 //            runId3TreeDemo();
 
       //      runCrossValidationDemo();
 
-            runReducedErrorPrunerDemo();
-      //      runFullOptimizationTest();
+          // runReducedErrorPrunerDemo();
+
 
         } catch (IOException e) {
             System.err.println("Error loading data: " + e.getMessage());
@@ -149,72 +149,4 @@ public class ExperimentRunner {
         return isCont;
     }
 
-
-    private static void runFullOptimizationTest() throws IOException {
-        System.out.println("\n========================================================================");
-        System.out.println("       VERGLEICH: DISKRETISIERUNG | OHNE PRUNING vs. MIT PRUNING");
-        System.out.println("========================================================================");
-        System.out.printf("%-18s | %-4s | %-15s | %-15s%n", "Methode", "Bins", "Accuracy (Raw)", "Accuracy (Pruned)");
-        System.out.println("------------------------------------------------------------------------");
-
-        int[] binValues = {2, 3, 5, 10, 20};
-        List<BinningDiscretizer> discretizers = Arrays.asList(
-                new EqualWidthDiscretization(),
-                new EqualFrequencyDiscretization(),
-                new KMeansDiscretizer()
-        );
-
-        for (BinningDiscretizer discretizer : discretizers) {
-            for (int bins : binValues) {
-                List<Object[]> examples = getPreparedData();
-                examples = applyCustomDiscretization(examples, discretizer, bins);
-
-                int numFolds = 5;
-                Collections.shuffle(examples, new java.util.Random(0));
-                double[] rawAccs = new double[numFolds];
-                double[] prunedAccs = new double[numFolds];
-
-                for (int i = 0; i < numFolds; i++) {
-                    int from = i * examples.size() / numFolds;
-                    int to = (i + 1) * examples.size() / numFolds;
-
-                    List<Object[]> testData = examples.subList(from, to);
-                    List<Object[]> trainDataFull = new ArrayList<>(examples);
-                    trainDataFull.removeAll(testData);
-
-                    // --- 1. Accuracy OHNE Pruning ---
-                    DecisionTree rawTree = ID3Utils.createTree(trainDataFull, LABEL_ATTR_INDEX);
-                    rawAccs[i] = ID3Utils.getClassificationAccuracy(rawTree, testData, LABEL_ATTR_INDEX);
-
-                    // --- 2. Accuracy MIT Pruning ---
-                    // Für Reduced Error Pruning brauchen wir ein separates Validierungset (ca. 20% vom Training)
-                    int splitIdx = (int) (trainDataFull.size() * 0.8);
-                    List<Object[]> buildData = trainDataFull.subList(0, splitIdx);
-                    List<Object[]> pruneValidationData = trainDataFull.subList(splitIdx, trainDataFull.size());
-
-                    DecisionTree treeToPrune = ID3Utils.createTree(buildData, LABEL_ATTR_INDEX);
-                    new ReducedErrorPruner().prune(treeToPrune, pruneValidationData, LABEL_ATTR_INDEX);
-                    prunedAccs[i] = ID3Utils.getClassificationAccuracy(treeToPrune, testData, LABEL_ATTR_INDEX);
-                }
-
-                double avgRaw = java.util.Arrays.stream(rawAccs).average().orElse(0.0);
-                double avgPruned = java.util.Arrays.stream(prunedAccs).average().orElse(0.0);
-
-                String name = discretizer.getClass().getSimpleName().replace("Discretization", "");
-                System.out.printf("%-18s | %-4d | %-15.2f%% | %-15.2f%%%n", name, bins, avgRaw * 100, avgPruned * 100);
-            }
-            System.out.println("------------------------------------------------------------------------");
-        }
-    }
-
-    private static List<Object[]> applyCustomDiscretization(List<Object[]> examples, BinningDiscretizer discretizer, int bins) {
-        ArrayList<Boolean> continuousMap = getContinuousAttributeMap();
-        for (int i = 0; i < continuousMap.size(); i++) {
-            // Diskretisiere nur, wenn es eine numerische Spalte und nicht das Label ist
-            if (continuousMap.get(i) && i != LABEL_ATTR_INDEX) {
-                examples = discretizer.discretize(bins, examples, i);
-            }
-        }
-        return examples;
-    }
 }
