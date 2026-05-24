@@ -68,6 +68,7 @@ public class CSVReader {
 
         // Runs through the entire line character after character.
         // inQuotes keeps tracks of whether we are currently operating within one value, and if yes, ignores the delimiter character.
+        // Empty values ("") receive their own array entry by nature.
         for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
             if (c == quote) {
